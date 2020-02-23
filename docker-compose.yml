@@ -1,0 +1,65 @@
+version: '3'
+services:
+  sso.es_apm:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.6
+    ports:
+      - "9200:9200"
+    environment:
+      - cluster.name=nfhsdev-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - apm-server.ilm.enabled=auto
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - nfhs-esm-data:/usr/share/elasticsearch/data
+    external_links:
+      - sso.es_apm:sso.es_apm
+
+
+  sso.kibana:
+    image: docker.elastic.co/kibana/kibana:6.8.6
+    ports:
+      - "5601:5601"
+    environment:
+      XPACK_MONITORING_ENABLED: 'true'
+    depends_on:
+      - sso.es_apm
+    volumes:
+      - nfhs-kibana-data:/usr/share/kibana/data
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+
+
+  sso.apm:
+    image: docker.elastic.co/apm/apm-server:6.6.0
+    ports:
+      - "8200:8200"
+    command: --strict.perms=false
+    environment:
+      - output.elasticsearch.pipeline='_none'
+      - apm-server.host="0.0.0.0:8200"
+      - setup.kibana.host="sso.kibana:5601"
+      - setup.template.enabled=true
+      - logging.to_files=false
+    depends_on:
+      - sso.es_apm
+      - sso.kibana
+    external_links:
+      - sso.apm:sso.apm
+    volumes:
+      - nfhs-apm-data:/usr/share/apm/data
+      - ./apm-server.docker.yml:/usr/share/apm-server/apm-server.yml
+
+
+volumes:
+  nfhs-esm-data:
+    driver: local
+  nfhs-kibana-data:
+    driver: local
+  nfhs-apm-data:
+    driver: local
+
+  

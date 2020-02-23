@@ -1,0 +1,5 @@
+
+server.name: kibana
+server.host: "0"
+elasticsearch.hosts: [ http://sso.es_apm:9200 ]
+xpack.monitoring.ui.container.elasticsearch.enabled: true
