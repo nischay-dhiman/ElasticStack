@@ -31,8 +31,6 @@ pip install docker-compose
 configure their Docker virtual machine to have more than the default 2 GiB of
 RAM:
 
-![Docker VM memory settings](screenshots/docker-vm-memory-settings.png)
-
 * Linux Users must set the following configuration as `root`:
 
 ```
